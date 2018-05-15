@@ -42,7 +42,6 @@ public class TwitterSpout extends BaseRichSpout {
             }
 
             public void onStatus(Status status) {
-                System.out.println("DEBUG SU - " + status.getText() + " - " + status.getUser().getLocation());
                 queue.offer(status);
             }
 
@@ -63,9 +62,10 @@ public class TwitterSpout extends BaseRichSpout {
             }
         });
 
-        // zapytanie, ktore pozwoli odfiltrowac interesujace nas tweety ze wszystkich dostepnych
+        // zapytanie, ktore pozwoli odfiltrowac interesujace nas tweety z Europy Zachodniej ze strumienia wszystkich
+        // dostepnych tweetow
         final FilterQuery filterQuery = new FilterQuery();
-        filterQuery.track(new String[]{"chocolate"});
+        filterQuery.locations(new double[]{-9.17, 38.45}, new double[]{21.47, 54.3});
         twitterStream.filter(filterQuery);
 
     }

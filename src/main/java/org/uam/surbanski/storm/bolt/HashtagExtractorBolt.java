@@ -21,7 +21,7 @@ public class HashtagExtractorBolt extends BaseBasicBolt {
         for (String word : words) {
             if (StringUtils.startsWith(word, "#")) {
                 if (coordinates != null) basicOutputCollector.emit(new Values(word, coordinates.toString()));
-                else basicOutputCollector.emit(new Values(word, ""));
+                else basicOutputCollector.emit(new Values(word, "GeoLocation{nieudostepnione}"));
             }
         }
     }

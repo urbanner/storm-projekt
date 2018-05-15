@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.storm.starter.tools;
+package org.uam.surbanski.storm.tools;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -86,8 +86,8 @@ public final class SlidingWindowCounter<T> implements Serializable {
     this.tailSlot = slotAfter(headSlot);
   }
 
-  public void incrementCount(T obj) {
-    objCounter.incrementCount(obj, headSlot);
+  public void incrementCount(T obj, T valueToList) {
+    objCounter.incrementCount(obj, headSlot, valueToList);
   }
 
   /**
@@ -104,6 +104,11 @@ public final class SlidingWindowCounter<T> implements Serializable {
     objCounter.wipeZeros();
     objCounter.wipeSlot(tailSlot);
     advanceHead();
+    return counts;
+  }
+
+  public Map<T, String> getValuesAndDontAdvanceWindow() {
+    Map<T, String> counts = objCounter.getValues();
     return counts;
   }
 

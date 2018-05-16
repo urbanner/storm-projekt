@@ -37,12 +37,12 @@ public final class IntermediateRankingsBolt extends AbstractRankerBolt {
     super();
   }
 
-  public IntermediateRankingsBolt(int topN) {
-    super(topN);
+  public IntermediateRankingsBolt(int topN, boolean sendString) {
+    super(topN, sendString);
   }
 
-  public IntermediateRankingsBolt(int topN, int emitFrequencyInSeconds) {
-    super(topN, emitFrequencyInSeconds);
+  public IntermediateRankingsBolt(int topN, int emitFrequencyInSeconds, boolean sendString) {
+    super(topN, emitFrequencyInSeconds, sendString);
   }
 
   @Override

@@ -37,13 +37,14 @@ public final class TotalRankingsBolt extends AbstractRankerBolt {
     super();
   }
 
-  public TotalRankingsBolt(int topN) {
-    super(topN);
+  public TotalRankingsBolt(int topN, boolean sendString) {
+    super(topN, sendString);
   }
 
-  public TotalRankingsBolt(int topN, int emitFrequencyInSeconds) {
-    super(topN, emitFrequencyInSeconds);
+  public TotalRankingsBolt(int topN, int emitFrequencyInSeconds, boolean sendString) {
+    super(topN, emitFrequencyInSeconds, sendString);
   }
+
 
   @Override
   void updateRankingsWithTuple(Tuple tuple) {

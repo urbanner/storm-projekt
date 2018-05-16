@@ -48,16 +48,17 @@ public abstract class AbstractRankerBolt extends BaseBasicBolt {
   private final int emitFrequencyInSeconds;
   private final int count;
   private final Rankings rankings;
+  private boolean sendString;
 
   public AbstractRankerBolt() {
-    this(DEFAULT_COUNT, DEFAULT_EMIT_FREQUENCY_IN_SECONDS);
+    this(DEFAULT_COUNT, DEFAULT_EMIT_FREQUENCY_IN_SECONDS, false);
   }
 
-  public AbstractRankerBolt(int topN) {
-    this(topN, DEFAULT_EMIT_FREQUENCY_IN_SECONDS);
+  public AbstractRankerBolt(int topN, boolean sendString) {
+    this(topN, DEFAULT_EMIT_FREQUENCY_IN_SECONDS, sendString);
   }
 
-  public AbstractRankerBolt(int topN, int emitFrequencyInSeconds) {
+  public AbstractRankerBolt(int topN, int emitFrequencyInSeconds, boolean sendString) {
     if (topN < 1) {
       throw new IllegalArgumentException("topN must be >= 1 (you requested " + topN + ")");
     }
@@ -68,6 +69,7 @@ public abstract class AbstractRankerBolt extends BaseBasicBolt {
     count = topN;
     this.emitFrequencyInSeconds = emitFrequencyInSeconds;
     rankings = new Rankings(count);
+    this.sendString = sendString;
   }
 
   protected Rankings getRankings() {
@@ -91,7 +93,8 @@ public abstract class AbstractRankerBolt extends BaseBasicBolt {
   abstract void updateRankingsWithTuple(Tuple tuple);
 
   private void emitRankings(BasicOutputCollector collector) {
-    collector.emit(new Values(rankings.copy()));
+    if (sendString) collector.emit(new Values(rankings.copy().toString()));
+    else collector.emit(new Values(rankings.copy()));
     getLogger().debug("Rankings: " + rankings);
   }
 

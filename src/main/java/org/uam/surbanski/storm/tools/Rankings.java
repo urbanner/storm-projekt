@@ -71,13 +71,12 @@ public class Rankings implements Serializable {
    * enclosing List instance, and we do try to defensively copy any contained Rankable objects, too.  However, the
    * contract of {@link Rankable#copy()} does not guarantee that any Object's embedded within
    * a Rankable will be defensively copied, too.
-   *
    * @return a somewhat defensive copy of ranked items
    */
   public List<Rankable> getRankings() {
     List<Rankable> copy = Lists.newLinkedList();
     for (Rankable r: rankedItems) {
-      copy.add(r.copy());
+      copy.add(r);
     }
     return ImmutableList.copyOf(copy);
   }

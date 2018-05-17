@@ -21,7 +21,7 @@
       <!--
         Uzyj "provided" scope by wylaczyc artefakty Storma z jara topologii. (Klaser juz je bedzie zawierac). Uzyj "compile" scope jesli uruchamiasz w IDE w w trybie lokalanym
       -->
-        <scope>compile</scope>
+        <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.storm</groupId>
@@ -98,7 +98,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

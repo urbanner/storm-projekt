@@ -26,7 +26,7 @@ class HashtagRankingTopologyBuilder {
 
         // implementacja KafkaBolta
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", "nimbus1:9092");
         props.put("acks", "1");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -40,10 +40,10 @@ class HashtagRankingTopologyBuilder {
 
         builder.setSpout("twitter-spout", new TwitterSpout());
         builder.setBolt("data-extractor", new HashtagExtractorBolt()).shuffleGrouping("twitter-spout");
-        builder.setBolt("hashtag-counter", new RollingCountBolt(60, 5)).fieldsGrouping("data-extractor", new Fields("hashtag"));
-        builder.setBolt("intermediate-ranker", new IntermediateRankingsBolt(10, 10, false)).fieldsGrouping
+        builder.setBolt("hashtag-counter", new RollingCountBolt(300, 60)).fieldsGrouping("data-extractor", new Fields("hashtag"));
+        builder.setBolt("intermediate-ranker", new IntermediateRankingsBolt(10, 60, false)).fieldsGrouping
                 ("hashtag-counter", new Fields("hashtag"));
-        builder.setBolt("total-ranker", new TotalRankingsBolt(10, 10, true)).globalGrouping("intermediate-ranker");
+        builder.setBolt("total-ranker", new TotalRankingsBolt(10, 60, true)).globalGrouping("intermediate-ranker");
         builder.setBolt("kafka-sender", kafkaBolt).shuffleGrouping("total-ranker");
 
         return builder.createTopology();

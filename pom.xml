@@ -4,7 +4,7 @@
 
     <groupId>org.uam.surbanski</groupId>
     <artifactId>surbanski-storm-projekt</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>surbanski-storm-projekt</name>

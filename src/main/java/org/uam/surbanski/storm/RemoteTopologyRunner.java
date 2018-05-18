@@ -12,8 +12,8 @@ public class RemoteTopologyRunner {
         StormTopology stormTopology = HashtagRankingTopologyBuilder.build();
 
         Config config = new Config();
-        //config.setNumWorkers(2);
-        config.setMessageTimeoutSecs(120);
+        config.setNumWorkers(2);
+        config.setMessageTimeoutSecs(600);
 
         StormSubmitter.submitTopology("twitter-hashtag-ranking-topology", config, stormTopology);
     }

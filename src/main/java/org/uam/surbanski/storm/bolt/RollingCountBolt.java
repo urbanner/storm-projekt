@@ -30,6 +30,7 @@ import org.uam.surbanski.storm.tools.NthLastModifiedTimeTracker;
 import org.uam.surbanski.storm.tools.SlidingWindowCounter;
 import org.uam.surbanski.storm.util.TupleHelpers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,7 @@ public class RollingCountBolt extends BaseRichBolt {
     private final int emitFrequencyInSeconds;
     private OutputCollector collector;
     private NthLastModifiedTimeTracker lastModifiedTracker;
+    private List<Tuple> anchors = new ArrayList<Tuple>();
 
     private Map<String, List> objToCoordinates = new HashMap<String, List>();
 
@@ -89,6 +91,7 @@ public class RollingCountBolt extends BaseRichBolt {
             emitCurrentWindowCounts();
         }
         else {
+            anchors.add(tuple);
             countObjAndAck(tuple);
         }
     }
@@ -121,7 +124,8 @@ public class RollingCountBolt extends BaseRichBolt {
             Object obj = entry.getKey();
             Long count = entry.getValue();
             String coordinates = values.get(obj);
-            collector.emit(new Values(obj, count, coordinates));
+            collector.emit(anchors, new Values(obj, count, coordinates));
+            anchors.clear();
         }
     }
 

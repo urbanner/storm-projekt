@@ -11,6 +11,7 @@ import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class TwitterSpout extends BaseRichSpout {
@@ -76,7 +77,7 @@ public class TwitterSpout extends BaseRichSpout {
         if (status == null) {
             Utils.sleep(50);
         } else {
-            spoutOutputCollector.emit(new Values(status));
+            spoutOutputCollector.emit(new Values(status), UUID.randomUUID());
         }
     }
 

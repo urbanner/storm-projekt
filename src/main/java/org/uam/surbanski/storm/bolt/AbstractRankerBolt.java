@@ -19,9 +19,12 @@ package org.uam.surbanski.storm.bolt;
 
 
 import org.apache.storm.Config;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseBasicBolt;
+import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
@@ -29,22 +32,26 @@ import org.apache.storm.utils.TupleUtils;
 import org.uam.surbanski.storm.tools.Rankings;
 import twitter4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * This abstract bolt provides the basic behavior of bolts that rank objects according to their count.
  * <p/>
- * It uses a template method design pattern for {@link AbstractRankerBolt#execute(Tuple, BasicOutputCollector)} to allow
+ * It uses a template method design pattern for  to allow
  * actual bolt implementations to specify how incoming tuples are processed, i.e. how the objects embedded within those
  * tuples are retrieved and counted.
  */
-public abstract class AbstractRankerBolt extends BaseBasicBolt {
+public abstract class AbstractRankerBolt extends BaseRichBolt {
 
   private static final long serialVersionUID = 4931640198501530202L;
   private static final int DEFAULT_EMIT_FREQUENCY_IN_SECONDS = 2;
   private static final int DEFAULT_COUNT = 10;
 
+  private OutputCollector outputCollector;
+  private List<Tuple> anchors = new ArrayList<Tuple>();
   private final int emitFrequencyInSeconds;
   private final int count;
   private final Rankings rankings;
@@ -80,21 +87,29 @@ public abstract class AbstractRankerBolt extends BaseBasicBolt {
    * This method functions as a template method (design pattern).
    */
   @Override
-  public final void execute(Tuple tuple, BasicOutputCollector collector) {
+  public final void execute(Tuple tuple) {
     if (TupleUtils.isTick(tuple)) {
       getLogger().debug("Received tick tuple, triggering emit of current rankings");
-      emitRankings(collector);
+      emitRankings(outputCollector);
     }
     else {
+      anchors.add(tuple);
+      outputCollector.ack(tuple);
       updateRankingsWithTuple(tuple);
     }
   }
 
+  @Override
+  public void prepare(Map var1, TopologyContext var2, OutputCollector outputCollector) {
+    this.outputCollector=outputCollector;
+  }
+
   abstract void updateRankingsWithTuple(Tuple tuple);
 
-  private void emitRankings(BasicOutputCollector collector) {
-    if (sendString) collector.emit(new Values(rankings.copy().toString()));
-    else collector.emit(new Values(rankings.copy()));
+  private void emitRankings(OutputCollector collector) {
+    if (sendString) collector.emit(anchors, new Values(rankings.copy().toString()));
+    else collector.emit(anchors, new Values(rankings.copy()));
+    anchors.clear();
     getLogger().debug("Rankings: " + rankings);
   }
 

@@ -12,6 +12,6 @@ public class LocalTopologyRunner {
         StormTopology topology = HashtagRankingTopologyBuilder.build();
 
         LocalCluster localCluster = new LocalCluster();
-        localCluster.submitTopology("twitter-hashtag-ranking-topology", config, topology);
+        localCluster.submitTopology("surbanski-topologia-twitter-hashtag-ranking", config, topology);
     }
 }

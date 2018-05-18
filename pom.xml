@@ -4,7 +4,7 @@
 
     <groupId>org.uam.surbanski</groupId>
     <artifactId>surbanski-storm-projekt</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>surbanski-storm-projekt</name>
@@ -84,7 +84,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass></mainClass>
+                            <mainClass>org.uam.surbanski.storm.RemoteTopologyRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

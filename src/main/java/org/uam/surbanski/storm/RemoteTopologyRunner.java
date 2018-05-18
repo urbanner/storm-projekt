@@ -13,8 +13,9 @@ public class RemoteTopologyRunner {
 
         Config config = new Config();
         config.setNumWorkers(2);
+        config.setMaxSpoutPending(5000);
         config.setMessageTimeoutSecs(600);
 
-        StormSubmitter.submitTopology("twitter-hashtag-ranking-topology", config, stormTopology);
+        StormSubmitter.submitTopology("surbanski-topologia-twitter-hashtag-ranking", config, stormTopology);
     }
 }

@@ -33,18 +33,18 @@ class HashtagRankingTopologyBuilder {
 
         KafkaBolt kafkaBolt = new KafkaBolt<String, String>()
                 .withProducerProperties(props)
-                .withTopicSelector(new DefaultTopicSelector("twitter-hashtag-ranking"))
+                .withTopicSelector(new DefaultTopicSelector("surbanski-twitter-hashtag-ranking"))
                 .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper<>(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()), "rankings"));
 
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("twitter-spout", new TwitterSpout());
-        builder.setBolt("data-extractor", new HashtagExtractorBolt()).shuffleGrouping("twitter-spout");
-        builder.setBolt("hashtag-counter", new RollingCountBolt(300, 60)).fieldsGrouping("data-extractor", new Fields("hashtag"));
-        builder.setBolt("intermediate-ranker", new IntermediateRankingsBolt(10, 60, false)).fieldsGrouping
-                ("hashtag-counter", new Fields("hashtag"));
-        builder.setBolt("total-ranker", new TotalRankingsBolt(10, 60, true)).globalGrouping("intermediate-ranker");
-        builder.setBolt("kafka-sender", kafkaBolt).shuffleGrouping("total-ranker");
+        builder.setSpout("strumien-twittera", new TwitterSpout(), 4);
+        builder.setBolt("wydobycie-danych", new HashtagExtractorBolt()).shuffleGrouping("strumien-twittera");
+        builder.setBolt("zliczanie-wystapien-hashtagow", new RollingCountBolt(300, 60)).fieldsGrouping("wydobycie-danych", new Fields("hashtag"));
+        builder.setBolt("ranking-posredni", new IntermediateRankingsBolt(10, 60, false)).fieldsGrouping
+                ("zliczanie-wystapien-hashtagow", new Fields("hashtag"));
+        builder.setBolt("ranking-glowny", new TotalRankingsBolt(10, 60, true)).globalGrouping("ranking-posredni");
+        builder.setBolt("nadawca-do-kafki", kafkaBolt).shuffleGrouping("ranking-glowny");
 
         return builder.createTopology();
     }

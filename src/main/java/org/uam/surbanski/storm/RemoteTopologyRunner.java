@@ -9,12 +9,11 @@ import org.apache.storm.generated.StormTopology;
 
 public class RemoteTopologyRunner {
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
-        StormTopology stormTopology = HashtagRankingTopologyBuilder.build();
-
         Config config = new Config();
         config.setNumWorkers(2);
         config.setMaxSpoutPending(5000);
-        config.setMessageTimeoutSecs(600);
+
+        StormTopology stormTopology = HashtagRankingTopologyBuilder.build();
 
         StormSubmitter.submitTopology("surbanski-topologia-twitter-hashtag-ranking", config, stormTopology);
     }

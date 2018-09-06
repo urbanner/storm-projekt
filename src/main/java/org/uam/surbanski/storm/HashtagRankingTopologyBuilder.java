@@ -38,13 +38,14 @@ class HashtagRankingTopologyBuilder {
 
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("strumien-twittera", new TwitterSpout(), 4);
-        builder.setBolt("wydobycie-danych", new HashtagExtractorBolt()).shuffleGrouping("strumien-twittera");
-        builder.setBolt("zliczanie-wystapien-hashtagow", new RollingCountBolt(300, 60)).fieldsGrouping("wydobycie-danych", new Fields("hashtag"));
-        builder.setBolt("ranking-posredni", new IntermediateRankingsBolt(10, 60, false)).fieldsGrouping
+        builder.setSpout("strumien-twittera", new TwitterSpout());
+        builder.setBolt("wydobycie-danych", new HashtagExtractorBolt(), 2).setNumTasks(4).shuffleGrouping("strumien-twittera");
+        builder.setBolt("zliczanie-wystapien-hashtagow", new RollingCountBolt(20, 5)).fieldsGrouping
+                ("wydobycie-danych", new Fields("hashtag"));
+        builder.setBolt("ranking-posredni", new IntermediateRankingsBolt(10, 5, false)).fieldsGrouping
                 ("zliczanie-wystapien-hashtagow", new Fields("hashtag"));
-        builder.setBolt("ranking-glowny", new TotalRankingsBolt(10, 60, true)).globalGrouping("ranking-posredni");
-        builder.setBolt("nadawca-do-kafki", kafkaBolt).shuffleGrouping("ranking-glowny");
+        builder.setBolt("ranking-glowny", new TotalRankingsBolt(10, 5, true)).globalGrouping("ranking-posredni");
+        //builder.setBolt("nadawca-do-kafki", kafkaBolt).shuffleGrouping("ranking-glowny");
 
         return builder.createTopology();
     }

@@ -91,6 +91,7 @@ public class RollingCountBolt extends BaseRichBolt {
             emitCurrentWindowCounts();
         }
         else {
+            collector.ack(tuple);
             anchors.add(tuple);
             countObjAndAck(tuple);
         }
@@ -124,16 +125,17 @@ public class RollingCountBolt extends BaseRichBolt {
             Object obj = entry.getKey();
             Long count = entry.getValue();
             String coordinates = values.get(obj);
+            System.out.println("DEBUG SU2" + anchors.toString());
             collector.emit(anchors, new Values(obj, count, coordinates));
-            anchors.clear();
         }
+        anchors.clear();
     }
 
     private void countObjAndAck(Tuple tuple) {
         Object hashtag = tuple.getValueByField("hashtag");
         String coordinates = tuple.getStringByField("coordinates");
         counter.incrementCount(hashtag, coordinates);
-        collector.ack(tuple);
+        //collector.ack(tuple);
     }
 
     private int deriveNumWindowChunksFrom(int windowLengthInSeconds, int windowUpdateFrequencyInSeconds) {

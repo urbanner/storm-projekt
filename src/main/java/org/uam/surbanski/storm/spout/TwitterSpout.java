@@ -10,31 +10,28 @@ import org.apache.storm.utils.Utils;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class TwitterSpout extends BaseRichSpout {
     private SpoutOutputCollector spoutOutputCollector;
     private TwitterStream twitterStream;
-    private LinkedBlockingQueue<Status> queue;
+    private Map queue;
+    private Map controlQueue;
 
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
         this.spoutOutputCollector = spoutOutputCollector;
 
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.setDebugEnabled(true)
-                .setOAuthConsumerKey("<wstaw dane swojego konta na Twitterze>")
-                .setOAuthConsumerSecret("<wstaw dane swojego konta na Twitterze>")
-                .setOAuthAccessToken("<wstaw dane swojego konta na Twitterze>")
-                .setOAuthAccessTokenSecret("<wstaw dane swojego konta na Twitterze>");
+
 
         // tworze obiekt strumienia
         this.twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance();
 
         // kolejka na ktorej bede przechowywal w pamieci wiadomosci wyslane z Twittera, a spout bedzie z niej czytal
-        this.queue = new LinkedBlockingQueue<Status>();
+        this.queue = Collections.synchronizedMap(new LinkedHashMap<UUID, Status>());
+        this.controlQueue = Collections.synchronizedMap(new LinkedHashMap<UUID, Status>());
 
         // API Twittera wymaga uzycia obiektu klasy StatusListener, ktory kontroluje wysylane wiadomosci
         twitterStream.addListener(new StatusListener() {
@@ -43,7 +40,11 @@ public class TwitterSpout extends BaseRichSpout {
             }
 
             public void onStatus(Status status) {
-                queue.offer(status);
+                //System.out.println(status);
+                UUID id = UUID.randomUUID();
+
+                queue.put(id, status);
+                controlQueue.put(id, status);
             }
 
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
@@ -71,19 +72,55 @@ public class TwitterSpout extends BaseRichSpout {
 
     }
 
+
     @Override
     public void nextTuple() {
-        Status status = queue.poll();
-        if (status == null) {
-            Utils.sleep(50);
-        } else {
-            spoutOutputCollector.emit(new Values(status), UUID.randomUUID());
+
+        Status entry;
+        Set s = queue.keySet();
+        // This block is equivalent to polling
+
+        synchronized (queue) {
+            Iterator i = s.iterator(); // Must be in the synchronized block
+            if (!i.hasNext()) {
+                Utils.sleep(50);
+            } else {
+                UUID currId = (UUID) i.next();
+                entry = (Status) queue.get(currId);
+                spoutOutputCollector.emit(new Values(entry), currId);
+                i.remove();
+            }
         }
+
+
+        // Status status = queue.poll();
+
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("tweet"));
+    }
+
+    @Override
+    public void ack(Object msgId) {
+        UUID messageId = (UUID) msgId;
+        System.out.println("suckes!!!!!!!!!!!!!!!!!!!!!!!");
+        controlQueue.remove(messageId);
+    }
+
+    @Override
+    public void fail(Object msgId) {
+        UUID messageId = (UUID) msgId;
+        System.out.println("Tweet z id " + messageId + " nie zostal calkowicie przetworzony");
+        //System.out.println(queue.get(messageId).toString());
+        queue.put(messageId, controlQueue.get(messageId));
+        System.out.println(queue.get(messageId).toString());
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

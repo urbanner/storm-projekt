@@ -8,6 +8,7 @@ public class LocalTopologyRunner {
     public static void main(String[] args) {
         Config config = new Config();
         config.setDebug(true);
+        config.setMessageTimeoutSecs(40);
 
         StormTopology topology = HashtagRankingTopologyBuilder.build();
 

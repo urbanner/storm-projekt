@@ -17,7 +17,6 @@
  */
 package org.uam.surbanski.storm.bolt;
 
-
 import org.apache.storm.tuple.Tuple;
 import org.uam.surbanski.storm.tools.Rankings;
 import twitter4j.Logger;
@@ -44,7 +43,6 @@ public final class TotalRankingsBolt extends AbstractRankerBolt {
   public TotalRankingsBolt(int topN, int emitFrequencyInSeconds, boolean sendString) {
     super(topN, emitFrequencyInSeconds, sendString);
   }
-
 
   @Override
   void updateRankingsWithTuple(Tuple tuple) {

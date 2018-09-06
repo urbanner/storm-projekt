@@ -36,8 +36,12 @@ public class HashtagExtractorBolt extends BaseRichBolt {
 
         for (String word : words) {
             if (StringUtils.startsWith(word, "#")) {
-                if (coordinates != null) outputCollector.emit(tuple, new Values(word, coordinates));
-                else outputCollector.emit(tuple, new Values(word, "nieudostepnione"));
+                if (coordinates != null) {
+                    outputCollector.emit(tuple, new Values(word, coordinates));
+                }
+                else {
+                    outputCollector.emit(tuple, new Values(word, "nieudostepnione"));
+                }
                 outputCollector.ack(tuple);
             }
         }
